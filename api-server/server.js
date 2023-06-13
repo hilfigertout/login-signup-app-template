@@ -24,6 +24,14 @@ server.get('/users', (req, res) => {
   })
 })
 
+// server.post('/users', (req, res) => {
+//   //TODO - create new user account
+// })
+
+// server.post('/users/login/:userId', (req, res) => {
+//   //TODO - validate user login credentials, send back a cookie, store cookie in database.
+// })
+
 
 //DO NOT call server.listen() in this file. See index.js
 

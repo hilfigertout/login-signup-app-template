@@ -10,6 +10,13 @@ exports.up = function(knex) {
     table.string('password_salt').notNullable();
     table.string('email').notNullable();
     table.timestamps(true, true);
+  }).createTable('sessions', table => {
+    table.increments('id');
+    table.integer('user_id');
+    table.foreign('user_id').references('users.id').onUpdate('CASCADE').onDelete('CASCADE');
+    table.datetime('start_date', {useTz: false, precision: 0});
+    table.datetime('expire_date', {useTz: false, precision: 0});
+    table.string('cookie').unique();
   })
 };
 
@@ -18,5 +25,6 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-  return knex.schema.dropTableIfExists('users');
+  return knex.schema.dropTableIfExists('sessions')
+    .dropTableIfExists('users');
 };

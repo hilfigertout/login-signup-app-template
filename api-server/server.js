@@ -37,18 +37,18 @@ server.get('/users', (req, res) => {
 //   //TODO - create new user account
 // })
 
-server.post('/users/login/:userId', (req, res) => {
+server.post('/users/login', (req, res) => {
   //TODO - validate user login credentials
   
   knex('users')
-    .where('email', req.params.email)
+    .where('username', req.query.username)
     .then((users) => {
       if (users.length === 1) {
         let today = new Date()
         let sessionId = generateId(cookieLength);
         res.cookie('session', sessionId);
         knex('session')
-          .insert({cookie: sessionId, user_id: users[0].id, expire_date: new Date(today.getTime() + 86400000).toDateString()})
+          .insert({token: sessionId, user_id: users[0].id, expire_date: new Date(today.getTime() + 86400000).toDateString()})
           .then((response) => {
             res.status(200).send({message: "Login successful"});
           })
@@ -56,7 +56,10 @@ server.post('/users/login/:userId', (req, res) => {
       } else { 
         res.status(401).send({message: "No such user exists."})
       }
-    }).catch(err => console.log(err));
+    }).catch(err => {
+      console.log(err);
+      res.status(500).send({message: "Unable to query user table."})  
+    });
   //TODO - send back a cookie, store cookie in database.
   
 

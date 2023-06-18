@@ -1,29 +1,38 @@
 import {useState, useEffect, useContext} from 'react';
 import UserContext from '../UserContext';
+import TokenContext from '../TokenContext';
 
 const Login = () => {
 
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useContext(UserContext)
   const [username, setUsername] = useState('');
+  const [token, setToken] = useContext(TokenContext);
 
   const handleLogin = (e) => {
     e.preventDefault()
     const loginUsername = username;
     setLoading(true);
     if (loginUsername) {
-      fetch('http://localhost:8080/users')
-      .then(res => res.json())
-      .then(data => {
-        let foundUser = data.find(oneUser => oneUser.username = loginUsername)
-        if (foundUser) {
-          setUser(foundUser);
-        } else {
-          throw new Error(`No such user ${loginUsername}`)
-        }
-      })
-      .catch(err => console.log(`Error: ${err}`))
-      .finally(() => setLoading(false));
+      fetch('http://localhost:8080/users/login', {method: "POST"})
+        .then((res) => res.json())
+        .then(data => {
+          //TODO - if login successful, set token to response token and get user data.
+        })
+
+      //Below code queried all users looking for one. We want to select one user. z
+      // fetch('http://localhost:8080/users')
+      // .then(res => res.json())
+      // .then(data => {
+      //   let foundUser = data.find(oneUser => oneUser.username = loginUsername)
+      //   if (foundUser) {
+      //     setUser(foundUser);
+      //   } else {
+      //     throw new Error(`No such user ${loginUsername}`)
+      //   }
+      // })
+      // .catch(err => console.log(`Error: ${err}`))
+      // .finally(() => setLoading(false));
     }
     setLoading(false);
   }
@@ -32,7 +41,7 @@ const Login = () => {
     e.preventDefault()
     setLoading(true);
     setUser({});
-    //Add anything else that needs to happen once a user logs out here. (cookies, etc.)
+    //TODO Add anything else that needs to happen once a user logs out here. (set token, etc.)
     setLoading(false);
   }
 

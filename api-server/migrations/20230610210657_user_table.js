@@ -14,7 +14,7 @@ exports.up = function(knex) {
     table.increments('id');
     table.integer('user_id');
     table.foreign('user_id').references('users.id').onUpdate('CASCADE').onDelete('CASCADE');
-    table.datetime('expire_date', {useTz: false, precision: 0});
+    table.bigint('expire_timestamp');
     table.string('token').unique();
   })
 };

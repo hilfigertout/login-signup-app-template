@@ -21,7 +21,7 @@ const generateId = (length) => {
   }
   return result;
 }
-const cookieLength = 20;
+const tokenLength = 20;
 
 server.get('/users', (req, res) => {
   knex('users')
@@ -37,20 +37,40 @@ server.get('/users', (req, res) => {
 //   //TODO - create new user account
 // })
 
+server.get('/users/login/:token', (req, res) => {
+  const token = req.params.token;
+  knex('sessions as s')
+    .join('users as u', 's.user_id', 'u.id')
+    .where('s.token', token)
+    .andWhere('s.expire_timestamp', '>=', Date.now())
+    .then((data) => {
+      console.log(data);
+      if (data.length > 0) {
+        res.status(200).send(data[0]);
+      } else {
+        throw new Error(`No active session for token ${token}`)
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(401).send({message: err});
+    });
+
+})
+
 server.post('/users/login', (req, res) => {
   //TODO - validate user login credentials
-  
+  const {username} = req.body;
   knex('users')
-    .where('username', req.query.username)
+    .where('username', username)
     .then((users) => {
       if (users.length === 1) {
-        let today = new Date()
-        let sessionId = generateId(cookieLength);
-        res.cookie('session', sessionId);
-        knex('session')
-          .insert({token: sessionId, user_id: users[0].id, expire_date: new Date(today.getTime() + 86400000).toDateString()})
+        let expireTimestamp = Date.now() + 86400000
+        let sessionId = generateId(tokenLength);
+        knex('sessions')
+          .insert({token: sessionId, user_id: users[0].id, expire_timestamp: expireTimestamp})
           .then((response) => {
-            res.status(200).send({message: "Login successful"});
+            res.status(200).send({message: "Login successful", token: sessionId, expiration: expireTimestamp});
           })
           .catch((err) => console.error(`Insert error: ${err}`));
       } else { 
@@ -59,10 +79,7 @@ server.post('/users/login', (req, res) => {
     }).catch(err => {
       console.log(err);
       res.status(500).send({message: "Unable to query user table."})  
-    });
-  //TODO - send back a cookie, store cookie in database.
-  
-
+    }); 
 })
 
 

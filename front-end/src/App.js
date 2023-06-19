@@ -11,17 +11,27 @@ import useLocalStorageState from './useLocalStorageState';
 function App() {
 
   const [user, setUser] = React.useState({});
-  const [token, setToken] = useLocalStorageState({}, 'token');
+  const [token, setToken] = useLocalStorageState({tokenString: '', expiration: undefined}, 'token');
 
   React.useEffect(() => {
     if (token.tokenString) {
-      if (token.expiration <= Date.now()) {
-        setToken('');
+     if (token.expiration <= Date.now()) {
+        setToken({tokenString: '', expiration: undefined});
       } else {
-        //TODO - fetch user information;
+        fetch(`http://localhost:8080/users/login/${token.tokenString}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            setUser(data);
+          } else {
+            throw new Error(data.message)
+          }
+        })
+        .catch(err => console.log(err));
       }
     }
   }, [])
+
   
 
   //TODO - add localstorage to store the token from the database.

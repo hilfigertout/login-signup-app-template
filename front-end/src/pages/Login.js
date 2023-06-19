@@ -14,11 +14,27 @@ const Login = () => {
     const loginUsername = username;
     setLoading(true);
     if (loginUsername) {
-      fetch('http://localhost:8080/users/login', {method: "POST"})
+      fetch('http://localhost:8080/users/login', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({username: username})
+      })
         .then((res) => res.json())
         .then(data => {
-          //TODO - if login successful, set token to response token and get user data.
+          if (data.message?.match(/success/i)) {
+            setToken({tokenString: data.token, expiration: data.expiration})
+          } else {
+            throw new Error(data.message);
+          }
         })
+        .catch(err => console.log(err))
+        .finally(() => {
+          setLoading(false);
+          window.location.reload(false);
+        });
 
       //Below code queried all users looking for one. We want to select one user. z
       // fetch('http://localhost:8080/users')
@@ -33,15 +49,16 @@ const Login = () => {
       // })
       // .catch(err => console.log(`Error: ${err}`))
       // .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   const handleLogout = (e) => {
     e.preventDefault()
     setLoading(true);
     setUser({});
-    //TODO Add anything else that needs to happen once a user logs out here. (set token, etc.)
+    setToken({tokenString: '', expiration: undefined})
     setLoading(false);
   }
 

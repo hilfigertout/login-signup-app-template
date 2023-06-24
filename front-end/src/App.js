@@ -1,7 +1,7 @@
 import './App.css';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import React from 'react';
+import {useState, useEffect} from 'react';
 import UserContext from './UserContext';
 import SessionContext from './SessionContext';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
@@ -10,10 +10,10 @@ import useLocalStorageState from './useLocalStorageState';
 
 function App() {
 
-  const [user, setUser] = React.useState({});
+  const [user, setUser] = useState({});
   const [session, setSession] = useLocalStorageState({token: '', user_id: -1, expire_timestamp: undefined}, 'session_token');
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (session.token) {
      if (session.expire_timestamp <= Date.now()) {
         setSession({token: '', expire_timestamp: undefined});

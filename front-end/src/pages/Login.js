@@ -37,20 +37,6 @@ const Login = () => {
           setLoading(false);
           window.location.reload(false);
         });
-
-      //Below code queried all users looking for one. We want to select one user. z
-      // fetch('http://localhost:8080/users')
-      // .then(res => res.json())
-      // .then(data => {
-      //   let foundUser = data.find(oneUser => oneUser.username = loginUsername)
-      //   if (foundUser) {
-      //     setUser(foundUser);
-      //   } else {
-      //     throw new Error(`No such user ${loginUsername}`)
-      //   }
-      // })
-      // .catch(err => console.log(`Error: ${err}`))
-      // .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }

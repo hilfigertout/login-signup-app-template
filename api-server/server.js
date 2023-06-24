@@ -2,6 +2,7 @@ const express = require('express');
 const server = express();
 const knex = require('knex')(require('./knexfile.js')[process.env.PORT || 'development']);
 server.use(express.json());
+const bcrypt = require('bcrypt');
 
 server.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -13,7 +14,7 @@ server.use((req, res, next) => {
   next();
 });
 
-const generateId = (length) => {
+const generateToken = (length) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   let result = '';
   for (let i = 0; i < length; i++) {
@@ -59,27 +60,49 @@ server.get('/users/login/:token', (req, res) => {
 })
 
 server.post('/users/login', (req, res) => {
-  //TODO - validate user login credentials
-  const {username} = req.body;
+  const {username, password} = req.body;
   knex('users')
     .where('username', username)
     .then((users) => {
       if (users.length === 1) {
-        let expireTimestamp = Date.now() + 86400000
-        let sessionId = generateId(tokenLength);
-        knex('sessions')
-          .insert({token: sessionId, user_id: users[0].id, expire_timestamp: expireTimestamp})
-          .then((response) => {
-            res.status(200).send({message: "Login successful", token: sessionId, expiration: expireTimestamp});
-          })
-          .catch((err) => console.error(`Insert error: ${err}`));
+        bcrypt.compare(password, users[0].password_hash, (err, result) => {
+          if (result) {
+            let expireTimestamp = Date.now() + 86400000
+            let sessionToken = generateToken(tokenLength);
+            knex('sessions')
+              .insert({token: sessionToken, user_id: users[0].id, expire_timestamp: expireTimestamp})
+              .then((response) => {
+                res.status(200).send({message: "Login successful", token: sessionToken, expiration: expireTimestamp});
+              })
+              .catch((err) => {console.log(err); return res.status(500).send({message: "Error creating session"})});
+          } else {
+            res.status(401).send({message: "Incorrect password"})
+          }
+        })
       } else { 
-        res.status(401).send({message: "No such user exists."})
+        res.status(404).send({message: "No such user exists."})
       }
     }).catch(err => {
       console.log(err);
       res.status(500).send({message: "Unable to query user table."})  
     }); 
+})
+
+server.delete('/users/login', (req, res) => {
+  if (req.body) {
+    const {token, user_id, expire_timestamp} = req.body;
+    knex('sessions')
+      .where('token', token)
+      .andWhere('user_id', user_id)
+      .del()
+      .then(() => {
+        res.status(200).send({message: 'Session closed'})
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send({message: 'Unable to delete session token from record'})
+      })
+  }
 })
 
 

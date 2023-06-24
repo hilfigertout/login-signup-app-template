@@ -7,6 +7,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useContext(UserContext)
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [token, setToken] = useContext(TokenContext);
 
   const handleLogin = (e) => {
@@ -14,14 +15,15 @@ const Login = () => {
     const loginUsername = username;
     setLoading(true);
     if (loginUsername) {
-      fetch('http://localhost:8080/users/login', {
+      const init = {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({username: username})
-      })
+        body: JSON.stringify({username: username, password: password})
+      }
+      fetch('http://localhost:8080/users/login', init)
         .then((res) => res.json())
         .then(data => {
           if (data.message?.match(/success/i)) {
@@ -57,9 +59,22 @@ const Login = () => {
   const handleLogout = (e) => {
     e.preventDefault()
     setLoading(true);
-    setUser({});
-    setToken({tokenString: '', expiration: undefined})
-    setLoading(false);
+    const init = {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({token: token.tokenString, user_id: user.id, expire_date: token.expiration})
+    }
+    fetch('http://localhost:8080/users/login', init)
+    .then(res => res.json())
+    .catch(err => console.log(err))
+    .finally(() => {
+      setUser({});
+      setToken({tokenString: '', expiration: undefined})
+      setLoading(false);
+    })
   }
 
   return ( 
@@ -67,6 +82,7 @@ const Login = () => {
     {!(user.username) &&
     <form>
       <input type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+      <input type="password" placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <button className="login-button" disabled={loading} onClick={handleLogin}>Login</button>
     </form>
     }

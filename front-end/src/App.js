@@ -32,9 +32,6 @@ function App() {
     }
   }, [])
 
-  
-
-  //TODO - add localstorage to store the token from the database.
 
 
   return (

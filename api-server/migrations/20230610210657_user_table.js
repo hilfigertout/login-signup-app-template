@@ -7,7 +7,6 @@ exports.up = function(knex) {
     table.increments('id');
     table.string('username').notNullable().unique();
     table.string('password_hash').notNullable();
-    table.string('password_salt').notNullable();
     table.string('email').notNullable();
     table.timestamps(true, true);
   }).createTable('sessions', table => {

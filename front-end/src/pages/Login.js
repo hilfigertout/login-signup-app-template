@@ -1,6 +1,6 @@
 import {useState, useEffect, useContext} from 'react';
 import UserContext from '../UserContext';
-import TokenContext from '../TokenContext';
+import SessionContext from '../SessionContext';
 
 const Login = () => {
 
@@ -8,7 +8,7 @@ const Login = () => {
   const [user, setUser] = useContext(UserContext)
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useContext(TokenContext);
+  const [session, setSession] = useContext(SessionContext);
 
   const handleLogin = (e) => {
     e.preventDefault()
@@ -27,7 +27,7 @@ const Login = () => {
         .then((res) => res.json())
         .then(data => {
           if (data.message?.match(/success/i)) {
-            setToken({tokenString: data.token, expiration: data.expiration})
+            setSession({token: data.token, user_id: data.user_id, expire_timestamp: data.expiration})
           } else {
             throw new Error(data.message);
           }
@@ -65,14 +65,14 @@ const Login = () => {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({token: token.tokenString, user_id: user.id, expire_date: token.expiration})
+      body: JSON.stringify(session)
     }
     fetch('http://localhost:8080/users/login', init)
     .then(res => res.json())
     .catch(err => console.log(err))
     .finally(() => {
       setUser({});
-      setToken({tokenString: '', expiration: undefined})
+      setSession({token: '', expiration: undefined, expire_timestamp: 0});
       setLoading(false);
     })
   }

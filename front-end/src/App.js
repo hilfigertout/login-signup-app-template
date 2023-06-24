@@ -3,7 +3,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import React from 'react';
 import UserContext from './UserContext';
-import TokenContext from './TokenContext';
+import SessionContext from './SessionContext';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import useLocalStorageState from './useLocalStorageState';
 
@@ -11,14 +11,14 @@ import useLocalStorageState from './useLocalStorageState';
 function App() {
 
   const [user, setUser] = React.useState({});
-  const [token, setToken] = useLocalStorageState({tokenString: '', expiration: undefined}, 'token');
+  const [session, setSession] = useLocalStorageState({token: '', user_id: -1, expire_timestamp: undefined}, 'session_token');
 
   React.useEffect(() => {
-    if (token.tokenString) {
-     if (token.expiration <= Date.now()) {
-        setToken({tokenString: '', expiration: undefined});
+    if (session.token) {
+     if (session.expire_timestamp <= Date.now()) {
+        setSession({token: '', expire_timestamp: undefined});
       } else {
-        fetch(`http://localhost:8080/users/login/${token.tokenString}`)
+        fetch(`http://localhost:8080/users/login/${session.token}`)
         .then(res => res.json())
         .then(data => {
           if (data.token) {
@@ -36,7 +36,7 @@ function App() {
 
   return (
     <div className="App">
-      <TokenContext.Provider value={[token, setToken]}>
+      <SessionContext.Provider value={[session, setSession]}>
         <UserContext.Provider value={[user, setUser]}>
           <Router>
             <Routes>
@@ -45,7 +45,7 @@ function App() {
             </Routes>
           </Router>
         </UserContext.Provider>
-      </TokenContext.Provider>
+      </SessionContext.Provider>
     </div>
   );
 }

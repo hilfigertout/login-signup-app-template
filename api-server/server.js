@@ -30,6 +30,7 @@ server.get('/users', (req, res) => {
     res.status(200).send(data);
   })
   .catch(err => {
+    console.log(err);
     res.status(500).send(`Unable to get user data: ${err}`);
   })
 })
@@ -45,7 +46,6 @@ server.get('/users/login/:token', (req, res) => {
     .where('s.token', token)
     .andWhere('s.expire_timestamp', '>=', Date.now())
     .then((data) => {
-      console.log(data);
       if (data.length > 0) {
         res.status(200).send(data[0]);
       } else {
@@ -72,7 +72,7 @@ server.post('/users/login', (req, res) => {
             knex('sessions')
               .insert({token: sessionToken, user_id: users[0].id, expire_timestamp: expireTimestamp})
               .then((response) => {
-                res.status(200).send({message: "Login successful", token: sessionToken, expiration: expireTimestamp});
+                res.status(200).send({message: "Login successful", token: sessionToken, user_id: users[0].id, expire_timestamp: expireTimestamp});
               })
               .catch((err) => {console.log(err); return res.status(500).send({message: "Error creating session"})});
           } else {

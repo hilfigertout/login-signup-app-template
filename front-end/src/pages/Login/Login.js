@@ -1,6 +1,7 @@
 import {useState, useEffect, useContext} from 'react';
-import UserContext from '../UserContext';
-import SessionContext from '../SessionContext';
+import UserContext from '../../UserContext';
+import SessionContext from '../../SessionContext';
+import './Login.css'
 
 const Login = () => {
 
@@ -15,7 +16,7 @@ const Login = () => {
     const loginUsername = username;
     setLoading(true);
     if (loginUsername) {
-      const init = {
+      let init = {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -27,7 +28,7 @@ const Login = () => {
         .then((res) => res.json())
         .then(data => {
           if (data.message?.match(/success/i)) {
-            setSession({token: data.token, user_id: data.user_id, expire_timestamp: data.expiration})
+            setSession({token: data.token, user_id: data.user_id, expire_timestamp: data.expire_timestamp})
           } else {
             throw new Error(data.message);
           }
@@ -45,7 +46,7 @@ const Login = () => {
   const handleLogout = (e) => {
     e.preventDefault()
     setLoading(true);
-    const init = {
+    let init = {
       method: 'DELETE',
       headers: {
         'Accept': 'application/json',
@@ -63,21 +64,26 @@ const Login = () => {
     })
   }
 
+  //TODO - add error display for wrong password
   return ( 
   <div className="login-page">
-    {!(user.username) &&
-    <form>
-      <input type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} />
-      <input type="password" placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button className="login-button" disabled={loading} onClick={handleLogin}>Login</button>
-    </form>
+    
+    {!(user.username) && 
+    <>
+      <h1>Login</h1>
+      <form>
+        <input type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <input type="password" placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button className="login-button" disabled={loading} onClick={handleLogin}>Login</button>
+      </form>
+    </>
     }
     
     {user.username && 
-    <div>
+    <>
       <h1>You are logged in as {user.username}</h1>
       <button onClick={handleLogout}>Logout</button>
-    </div>}
+    </>}
   </div>  
   );
 }

@@ -1,0 +1,32 @@
+.signup-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.signup-page form {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+}
+
+.signup-page form * {
+  margin: 5px;
+  padding: 2px;
+}
+
+.signup-page form label{
+  align-self: flex-start;
+  margin: 2px;
+  padding: 0px;
+}
+
+.header-error {
+  width: 80%;
+  background-color: salmon;
+}
+
+.label-error {
+  color: red;
+}

@@ -1,6 +1,6 @@
 import './App.css';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import Login from './pages/Login/Login';
+import Signup from './pages/Signup/Signup';
 import {useState, useEffect} from 'react';
 import UserContext from './UserContext';
 import SessionContext from './SessionContext';

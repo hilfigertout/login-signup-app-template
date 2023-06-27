@@ -1,13 +1,10 @@
-import {useState, useContext} from 'react';
-import SessionContext from '../../SessionContext';
+import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import './Signup.css';
 
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [session, setSession] = useContext(SessionContext);
-
   const [disableButton, setDisableButton] = useState(true);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -16,8 +13,8 @@ const Signup = () => {
   const [error, setError] = useState({headerError: '', emailError: '', usernameError: '', passwordError: ''});
 
   //TODO - add a useEffect hook to fetch the usernames to ensure uniqueness.
+  //TODO - change the headerError to use the errorBar object.
 
-  //TODO - refactor this error check to just use the error object, because why not?
   const dataValidationCheck = () => {
     return (!!(email && 
             email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/) &&
@@ -68,53 +65,10 @@ const Signup = () => {
   }
 
 
-  //TODO - consider transparently routing the user to a third page to make the submission. This feels like best practice.
   const handleSubmit = (e) => {
     setDisableButton(true);
     e.preventDefault();
-    
-    let init = {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({username: username, email: email, password: password})
-    }
-    //TODO - test this for inputting non-unique user, return an error message if so.
-    fetch('http://localhost:8080/users', init)
-    .then(res => {
-      if (res.status === 201) {
-        return res.json();
-      } else if (res.status === 400) {
-        setError({...error, headerError: "400 Bad Request Data, could not create user"});
-        throw new Error("400: Bad Request");
-      } else if (res.status === 500) {
-        setError({...error, headerError: "500 Internal Server Error, could not create user"});
-        throw new Error("500: Internal Server Error");
-      }
-    }).then((msg) => {
-      console.log(msg.message);
-      //Fetch to log in
-      //TODO - handle this  failing to log us in initially, forcing us to refresh the page. Maybe implement the reroute tactic?
-      fetch('http://localhost:8080/users/login', init)
-      .then(res => res.json())
-      .then((data) => {
-          if (data.message?.match(/success/i)) {
-            setSession({token: data.token, user_id: data.user_id, expire_timestamp: data.expire_timestamp})
-          } else {
-            throw new Error(data.message);
-          }
-      }).catch(err => console.log(err))
-      .finally(() => {
-        navigate('/login')
-      })
-
-    })
-    .catch(err => console.log(err))
-    .finally(() => {
-      setDisableButton(false);
-    })
+    navigate('/postpage', {state: {origin: 'signup', postBody: {username, email, password}}})
   }
 
   return (

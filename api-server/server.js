@@ -53,7 +53,11 @@ server.post('/users', (req, res) => {
       .then((idArray) => res.status(201).send({user_id: idArray[0].id, message: `User created with id ${idArray[0].id}`}))
       .catch(err => {
         console.log(`Unable to create user: ${err}`);
-        return res.status(500).send({message: "Error: unable to create user"});
+        if (err.message.includes("users_username_unique")) {
+          return res.status(409).send({message: `Error: User ${username} already exists.`});
+        } else {
+          return res.status(500).send({message: "Error: unable to create user"});
+        }
       })
     })
   } else {
@@ -94,7 +98,7 @@ server.post('/users/login', (req, res) => {
             knex('sessions')
               .insert({token: sessionToken, user_id: users[0].id, expire_timestamp: expireTimestamp})
               .then((response) => {
-                return res.status(200).send({message: "Login successful", token: sessionToken, user_id: users[0].id, expire_timestamp: expireTimestamp});
+                return res.status(200).send({token: sessionToken, user_id: users[0].id, expire_timestamp: expireTimestamp});
               })
               .catch((err) => {
                 console.log(`Could not create user session: ${err}`); 
@@ -115,7 +119,7 @@ server.post('/users/login', (req, res) => {
 
 server.delete('/users/login', (req, res) => {
   if (req.body) {
-    const {token, user_id, expire_timestamp} = req.body;
+    const {token, user_id} = req.body;
     knex('sessions')
       .where('token', token)
       .andWhere('user_id', user_id)

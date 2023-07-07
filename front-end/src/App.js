@@ -14,6 +14,8 @@ function App() {
   const [user, setUser] = useState({});
   const [session, setSession] = useLocalStorageState({token: '', user_id: -1, expire_timestamp: undefined}, 'session_token');
 
+  //TODO - add session storage hook and state to 
+
   useEffect(() => {
     setLoading(true);
     if (session.token) {

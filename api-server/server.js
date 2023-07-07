@@ -28,10 +28,21 @@ const saltRounds = 10;
 
 
 
-server.get('/users', (req, res) => {
+server.get('/usernames', (req, res) => {
+  const {username} = req.query;
   knex('users')
+    .select('username')
+    .modify((queryBuilder) => {
+      if (username) {
+        queryBuilder.where('username', username);
+      }
+    })
   .then((data) => {
-    res.status(200).send(data);
+    if (data.length > 0) {
+      return res.status(200).send(data);
+    } else {
+      return res.status(404).send({message: `User ${username} not found`});
+    }
   })
   .catch(err => {
     console.log(err);
@@ -65,23 +76,28 @@ server.post('/users', (req, res) => {
   }
 })
 
-server.get('/users/login/:token', (req, res) => {
-  const token = req.params.token;
-  knex('sessions as s')
-    .join('users as u', 's.user_id', 'u.id')
-    .where('s.token', token)
-    .andWhere('s.expire_timestamp', '>=', Date.now())
-    .then((data) => {
-      if (data.length > 0) {
-        return res.status(200).send(data[0]);
-      } else {
-        return res.status(401).send(`No active session for token ${token}.`)
-      }
-    })
-    .catch(err => {
-      console.log(`Unable to search for session token: ${err}`);
-      return res.status(500).send({message: "Unable to pull user sesssions."});
-    });
+server.get('/users/login/', (req, res) => {
+  const {token, user_id, expire_timestamp} = req.query;
+  if (expire_timestamp < Date.now()) {
+    return res.status(401).send({message:`Token ${token} is expired.`});
+  } else {
+    knex('sessions as s')
+      .join('users as u', 's.user_id', 'u.id')
+      .where('s.token', token)
+      .andWhere('s.user_id', user_id)
+      .andWhere('s.expire_timestamp', expire_timestamp)
+      .then((data) => {
+        if (data.length > 0) {
+          return res.status(200).send(data[0]);
+        } else {
+          return res.status(401).send({message:`No active session for token ${token}.`});
+        }
+      })
+      .catch(err => {
+        console.log(`Unable to search for session token: ${err}`);
+        return res.status(500).send({message: "Unable to pull user sesssions."});
+      });
+  }
 
 })
 

@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import './Signup.css';
+import {ErrorBar} from '../../components';
 
 
 const Signup = () => {
@@ -10,10 +11,7 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState({headerError: '', emailError: '', usernameError: '', passwordError: ''});
-
-  //TODO - add a useEffect hook to fetch the usernames to ensure uniqueness.
-  //TODO - change the headerError to use the errorBar object.
+  const [error, setError] = useState({emailError: '', usernameError: '', passwordError: ''});
 
   const dataValidationCheck = () => {
     return (!!(email && 
@@ -68,12 +66,28 @@ const Signup = () => {
   const handleSubmit = (e) => {
     setDisableButton(true);
     e.preventDefault();
-    navigate('/postpage', {state: {origin: 'signup', postBody: {username, email, password}}})
+    fetch(`http://localhost:8080/usernames?username=${username}`)
+      .then((res) => {
+        if (res.ok) {
+          const triedUsername = username;
+          setError({...error, usernameError: `Username ${triedUsername} already taken.`})
+        } else if (res.status === 404) {          
+          navigate('/postpage', {state: {origin: 'signup', postBody: {username, email, password}}})
+        } else {
+          throw new Error('Could not check for new users');
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setDisableButton(false);
+      })
   }
 
   return (
     <div className='signup-page'>
-      <h1 className='header-error'>{error.headerError}</h1>
+      <ErrorBar />
       <form>
         <label htmlFor='email'>Email <span className="label-error">{error.emailError}</span></label>
         <input type='email' name='email' placeholder='Email' value={email} onChange={handleEmailChange}/>

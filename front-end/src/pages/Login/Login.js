@@ -3,7 +3,7 @@ import UserContext from '../../UserContext';
 import SessionContext from '../../SessionContext';
 import './Login.css'
 import { useNavigate } from 'react-router-dom';
-import ErrorBar from '../../components/ErrorBar/ErrorBar';
+import {ErrorBar} from '../../components';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,28 +19,6 @@ const Login = () => {
     const loginUsername = username;
     setLoading(true);
     if (loginUsername) {
-      // let init = {
-      //   method: 'POST',
-      //   headers: {
-      //     'Accept': 'application/json',
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({username: username, password: password})
-      // }
-      // fetch('http://localhost:8080/users/login', init)
-      //   .then((res) => res.json())
-      //   .then(data => {
-      //     if (data.message?.match(/success/i)) {
-      //       setSession({token: data.token, user_id: data.user_id, expire_timestamp: data.expire_timestamp})
-      //     } else {
-      //       throw new Error(data.message);
-      //     }
-      //   })
-      //   .catch(err => console.log(err))
-      //   .finally(() => {
-      //     setLoading(false);
-      //     window.location.reload(false);
-      //   });
       navigate('/postpage', {state: {origin: 'login', postBody: {username: username, password: password}}})
     } else {
       setLoading(false);
@@ -68,7 +46,6 @@ const Login = () => {
     })
   }
 
-  //TODO - add error display for wrong password
   return ( 
   <div className="login-page">
     <ErrorBar />

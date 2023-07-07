@@ -22,7 +22,7 @@ function App() {
         setSession({token: '', expire_timestamp: undefined});
         setLoading(false);
       } else {
-        fetch(`http://localhost:8080/users/login/${session.token}`)
+        fetch(`http://localhost:8080/users/login?token=${session.token}&user_id=${session.user_id}&expire_timestamp=${session.expire_timestamp}`)
         .then(res => {
           if (res.ok) {
             return res.json()

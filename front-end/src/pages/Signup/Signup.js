@@ -56,9 +56,9 @@ const Signup = () => {
     if (e.target.value !== password) {
       setError({...error, passwordError: 'Password fields must match.'})
     } else if (password !== '') {
-      setError({passwordError: ''});
+      setError({...error, passwordError: ''});
     } else {
-      setError({...error, passwordError: ''})
+      setError({...error, passwordError: 'Please enter a password'})
     }
   }
 
